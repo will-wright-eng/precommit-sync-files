@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.uv]
+dev-dependencies = []
+
+[project]
+name = "precommit-sync-files"
+version = "0.1.0"
+description = "A pre-commit hook to sync common files across repositories"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+authors = [
+    {name = "precommit-sync-files contributors"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+[project.scripts]
+sync-common-files = "precommit_sync_files.cli:main"
+
+[tool.setuptools]
+packages = ["precommit_sync_files"]
+
+[tool.setuptools.package-data]
+"*" = ["py.typed"]

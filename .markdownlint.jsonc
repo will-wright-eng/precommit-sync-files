@@ -1,0 +1,11 @@
+{
+  "default": true,
+  "MD003": { "style": "atx" },
+  "MD007": { "indent": 4 },
+
+  // Disable line length rule
+  "MD013": false,
+
+  "no-hard-tabs": false,
+  "whitespace": false
+}

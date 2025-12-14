@@ -1,0 +1,6 @@
+- id: sync-common-files
+  name: Sync common files across repos
+  entry: sync-common-files
+  language: python
+  pass_filenames: false
+  description: Ensures synced files match canonical source repository
