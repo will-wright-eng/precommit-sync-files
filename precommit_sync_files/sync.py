@@ -98,16 +98,6 @@ def find_config_file() -> Optional[Path]:
 
 
 def get_hook_version() -> Optional[str]:
-    """
-    Detect the version/tag of the hook itself when running as a pre-commit hook.
-
-    When pre-commit installs a hook, it clones the repository at the specified rev
-    into a cache directory. We can detect this and get the git tag/version.
-
-    Returns:
-        The git tag/version of the hook, or None if not running as a pre-commit hook
-        or if the version cannot be determined.
-    """
     try:
         # Get the directory where this module is located
         module_file = Path(__file__).resolve()
@@ -272,14 +262,6 @@ def compute_file_hash(file_path: Path) -> str:
 def compare_files(
     source_file: Path, dest_file: Path, repo_root: Path
 ) -> Tuple[bool, Optional[str]]:
-    """
-    Compare source and destination files using SHA-256 hashes.
-
-    Args:
-        source_file: Path to source file (relative to source repo root)
-        dest_file: Path to destination file (relative to consuming repo root)
-        repo_root: Root of consuming repository
-    """
     source_path = source_file
     dest_path = repo_root / dest_file
 
@@ -314,14 +296,6 @@ def compare_files(
 
 
 def sync_file(source_file: Path, dest_file: Path, repo_root: Path) -> None:
-    """
-    Copy source file to destination, creating parent directories if needed.
-
-    Args:
-        source_file: Path to source file (absolute)
-        dest_file: Path to destination file (relative to repo root)
-        repo_root: Root of consuming repository
-    """
     dest_path = repo_root / dest_file
 
     # Create parent directories if needed
@@ -336,14 +310,6 @@ def sync_file(source_file: Path, dest_file: Path, repo_root: Path) -> None:
 def sync_files(
     config: Dict, repo_root: Optional[Path] = None, write_mode: bool = False
 ) -> Tuple[List[str], List[str]]:
-    """
-    Main sync function that orchestrates file synchronization.
-
-    Args:
-        config: Configuration dictionary
-        repo_root: Root of consuming repository (defaults to current directory)
-        write_mode: If True, overwrite files instead of failing
-    """
     if repo_root is None:
         repo_root = Path.cwd()
 
