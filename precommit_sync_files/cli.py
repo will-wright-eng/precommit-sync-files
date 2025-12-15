@@ -8,6 +8,7 @@ from precommit_sync_files.sync import (
     sync_files,
 )
 from precommit_sync_files.log import get_logger
+from precommit_sync_files import __version__
 
 
 def main() -> int:
@@ -16,6 +17,8 @@ def main() -> int:
     debug_mode = "--debug" in sys.argv[1:]
 
     logger = get_logger(__name__, debug_mode)
+    logger.info("Starting precommit-sync-files")
+    logger.info(f"Version: {__version__}")
 
     try:
         # Load configuration
@@ -26,7 +29,7 @@ def main() -> int:
         # Missing config is a no-op (per design doc)
         if ".sync-files.toml not found" in str(e):
             return 0
-        logger.debug(f"Configuration error: {e}", file=sys.stderr)
+        logger.error(f"Configuration error: {e}")
         return 1
 
     try:
@@ -35,33 +38,30 @@ def main() -> int:
 
         # Print warnings
         for warning in warnings:
-            logger.debug(f"Warning: {warning}", file=sys.stderr)
+            logger.warning(f"Warning: {warning}")
 
         # Print errors and exit
         if errors:
-            logger.debug("File synchronization check failed:", file=sys.stderr)
+            logger.error("File synchronization check failed:")
             for error in errors:
-                logger.debug(f"  - {error}", file=sys.stderr)
+                logger.error(f"  - {error}")
             if not write_mode:
-                logger.debug(
-                    "\nRun with --write to automatically sync files.",
-                    file=sys.stderr,
-                )
+                logger.error("Run with --write to automatically sync files.")
             return 1
 
         if warnings:
             # In write mode, warnings indicate successful syncs
-            logger.debug("Files synchronized successfully:", file=sys.stderr)
+            logger.warning("Files synchronized successfully:")
             for warning in warnings:
-                logger.debug(f"  - {warning}", file=sys.stderr)
+                logger.warning(f"  - {warning}")
 
         return 0
 
     except (SourceFetchError, FileComparisonError, SyncError) as e:
-        logger.debug(f"Sync error: {e}", file=sys.stderr)
+        logger.error(f"Sync error: {e}")
         return 1
     except Exception as e:
-        logger.debug(f"Unexpected error: {e}", file=sys.stderr)
+        logger.error(f"Unexpected error: {e}")
         import traceback
 
         traceback.print_exc()
