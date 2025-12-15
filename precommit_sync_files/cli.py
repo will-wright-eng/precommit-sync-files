@@ -17,6 +17,8 @@ def main() -> int:
     debug_mode = "--debug" in sys.argv[1:]
 
     logger = get_logger(__name__, debug_mode)
+    print("Starting precommit-sync-files")
+    print(f"Version: {__version__}")
     logger.info("Starting precommit-sync-files")
     logger.info(f"Version: {__version__}")
 
