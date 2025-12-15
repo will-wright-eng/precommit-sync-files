@@ -39,18 +39,6 @@ Then run:
 pre-commit install
 ```
 
-### Standalone installation
-
-```bash
-pip install precommit-sync-files
-```
-
-Or with `uv`:
-
-```bash
-uv pip install precommit-sync-files
-```
-
 ## Configuration
 
 Create a `.sync-files.toml` file in your repository root:
@@ -61,12 +49,16 @@ repo = "https://github.com/will-wright-eng/precommit-sync-files"
 ref = "main"
 
 [[files]]
-src = ".github/workflows/ci.yaml"
-dst = ".github/workflows/ci.yaml"
+src = ".markdownlint.jsonc"
+dst = ".markdownlint.jsonc"
 
 [[files]]
-src = "pyproject.toml"
-dst = "pyproject.toml"
+src = ".codespellrc"
+dst = ".codespellrc"
+
+[[files]]
+src = "ruff.toml"
+dst = "ruff.toml"
 
 [options]
 mode = "check"  # "check" | "write" (default: "check")
