@@ -78,6 +78,12 @@ def load_config(config_path: Optional[Path] = None) -> Dict:
     if config["options"]["mode"] not in ("check", "write"):
         raise ConfigError("options.mode must be 'check' or 'write'")
 
+    # When running as a pre-commit hook, override the ref with the hook's own version
+    # This ensures files are fetched from the same tag/version as the hook itself
+    hook_version = get_hook_version()
+    if hook_version is not None:
+        config["source"]["ref"] = hook_version
+
     return config
 
 
@@ -88,6 +94,111 @@ def find_config_file() -> Optional[Path]:
         if config_path.exists():
             return config_path
         current = current.parent
+    return None
+
+
+def get_hook_version() -> Optional[str]:
+    """
+    Detect the version/tag of the hook itself when running as a pre-commit hook.
+
+    When pre-commit installs a hook, it clones the repository at the specified rev
+    into a cache directory. We can detect this and get the git tag/version.
+
+    Returns:
+        The git tag/version of the hook, or None if not running as a pre-commit hook
+        or if the version cannot be determined.
+    """
+    try:
+        # Get the directory where this module is located
+        module_file = Path(__file__).resolve()
+        module_path_str = str(module_file)
+
+        # Check if we're in a pre-commit cache directory
+        # Pre-commit cache paths typically contain ".cache/pre-commit"
+        if ".cache/pre-commit" not in module_path_str:
+            return None
+
+        # Find the repository root by walking up from the module file
+        # Pre-commit cache structure:
+        # ~/.cache/pre-commit/<repohash>/<repohash>/ (the actual repo checkout)
+        # or
+        # ~/.cache/pre-commit/<repohash>/py_env-*/lib/python*/site-packages/ (if installed as package)
+        current = module_file.parent
+        max_depth = 15  # Limit search depth
+        depth = 0
+
+        # Look for a directory that looks like a repo hash (long hex string)
+        # or contains a .git directory
+        while current != current.parent and depth < max_depth:
+            git_dir = current / ".git"
+
+            # Check if this directory has a .git folder (it's a git repo)
+            if git_dir.exists():
+                # Try to get the git tag/version
+                try:
+                    # First, try to get the exact tag at HEAD
+                    result = subprocess.run(
+                        ["git", "describe", "--tags", "--exact-match", "HEAD"],
+                        cwd=current,
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                    )
+                    if result.returncode == 0:
+                        tag = result.stdout.strip()
+                        if tag:
+                            return tag
+
+                    # If that fails, try to get the nearest tag
+                    result = subprocess.run(
+                        ["git", "describe", "--tags", "--abbrev=0", "HEAD"],
+                        cwd=current,
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                    )
+                    if result.returncode == 0:
+                        tag = result.stdout.strip()
+                        if tag:
+                            return tag
+
+                    # As a last resort, check what ref HEAD points to
+                    # This might be a tag if we're in detached HEAD state
+                    result = subprocess.run(
+                        ["git", "rev-parse", "HEAD"],
+                        cwd=current,
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                    )
+                    if result.returncode == 0:
+                        commit_sha = result.stdout.strip()
+                        # Try to find tags pointing to this commit
+                        result = subprocess.run(
+                            ["git", "tag", "--points-at", commit_sha],
+                            cwd=current,
+                            capture_output=True,
+                            text=True,
+                            check=False,
+                        )
+                        if result.returncode == 0:
+                            tags = result.stdout.strip().split("\n")
+                            # Return the first tag (prefer version tags starting with 'v')
+                            for tag in tags:
+                                if tag and tag.startswith("v"):
+                                    return tag
+                            if tags and tags[0]:
+                                return tags[0]
+                except (subprocess.CalledProcessError, FileNotFoundError):
+                    pass
+                break
+
+            current = current.parent
+            depth += 1
+    except Exception:
+        # If anything goes wrong, return None (fall back to config file ref)
+        pass
+
     return None
 
 
