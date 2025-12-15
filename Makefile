@@ -1,6 +1,3 @@
-#* Variables
-REPO_ROOT := $(shell git rev-parse --show-toplevel)
-
 # Extract version from __init__.py
 VERSION := $(shell grep -E "^__version__ = " precommit_sync_files/__init__.py | cut -d'"' -f2)
 TAG := v$(VERSION)
