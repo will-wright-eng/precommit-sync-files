@@ -1,0 +1,14 @@
+[source]
+repo = "https://github.com/will-wright-eng/precommit-sync-files"
+ref = "main"
+
+[[files]]
+src = ".markdownlint.jsonc"
+dst = ".markdownlint.jsonc"
+
+[[files]]
+src = ".codespellrc"
+dst = ".codespellrc"
+
+[options]
+mode = "check"
