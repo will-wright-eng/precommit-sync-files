@@ -31,11 +31,11 @@ repos:
     hooks:
     - id: codespell
 
-  - repo: local
-    hooks:
-      - id: sync-common-files
-        name: Sync common files across repos
-        entry: uv run sync-common-files
-        language: python
-        pass_filenames: false
-        description: Ensures synced files match canonical source repository
+  # - repo: local
+  #   hooks:
+  #     - id: sync-common-files
+  #       name: Sync common files across repos
+  #       entry: uv run sync-common-files
+  #       language: python
+  #       pass_filenames: false
+  #       description: Ensures synced files match canonical source repository

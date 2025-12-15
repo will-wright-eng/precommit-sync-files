@@ -3,4 +3,4 @@ skip = *.po,*.ts,./site/themes/,./site/public/,*.css
 count =
 quiet-level = 1
 write-changes = True
-ignore-words-list = wee,fugacity,filetest,uncomplete,newyorker,medias
+ignore-words-list = gabor

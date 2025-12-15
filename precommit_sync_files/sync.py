@@ -1,5 +1,3 @@
-"""Core sync engine for file synchronization."""
-
 import hashlib
 import shutil
 import subprocess
@@ -10,43 +8,22 @@ from typing import Dict, List, Optional, Tuple
 
 
 class SyncError(Exception):
-    """Base exception for sync operations."""
-
     pass
 
 
 class ConfigError(SyncError):
-    """Configuration-related errors."""
-
     pass
 
 
 class SourceFetchError(SyncError):
-    """Errors during source repository fetching."""
-
     pass
 
 
 class FileComparisonError(SyncError):
-    """Errors during file comparison."""
-
     pass
 
 
 def load_config(config_path: Optional[Path] = None) -> Dict:
-    """
-    Load and validate configuration from .sync-files.toml.
-
-    Args:
-        config_path: Path to config file. If None, searches for .sync-files.toml
-                     in current directory and parent directories.
-
-    Returns:
-        Parsed configuration dictionary.
-
-    Raises:
-        ConfigError: If config file is missing or invalid.
-    """
     if config_path is None:
         config_path = find_config_file()
 
@@ -105,12 +82,6 @@ def load_config(config_path: Optional[Path] = None) -> Dict:
 
 
 def find_config_file() -> Optional[Path]:
-    """
-    Search for .sync-files.toml in current directory and parent directories.
-
-    Returns:
-        Path to config file if found, None otherwise.
-    """
     current = Path.cwd()
     while current != current.parent:
         config_path = current / ".sync-files.toml"
@@ -121,20 +92,6 @@ def find_config_file() -> Optional[Path]:
 
 
 def fetch_source_repo(repo_url: str, ref: str, work_dir: Path) -> Path:
-    """
-    Clone source repository to a temporary directory.
-
-    Args:
-        repo_url: Git repository URL
-        ref: Branch, tag, or commit SHA
-        work_dir: Working directory for temporary files
-
-    Returns:
-        Path to cloned repository
-
-    Raises:
-        SourceFetchError: If git clone fails
-    """
     repo_dir = work_dir / "source_repo"
 
     # Remove existing directory if present
@@ -193,18 +150,6 @@ def fetch_source_repo(repo_url: str, ref: str, work_dir: Path) -> Path:
 
 
 def compute_file_hash(file_path: Path) -> str:
-    """
-    Compute SHA-256 hash of file contents.
-
-    Args:
-        file_path: Path to file
-
-    Returns:
-        Hexadecimal hash string
-
-    Raises:
-        FileComparisonError: If file cannot be read
-    """
     try:
         with open(file_path, "rb") as f:
             content = f.read()
@@ -223,10 +168,6 @@ def compare_files(
         source_file: Path to source file (relative to source repo root)
         dest_file: Path to destination file (relative to consuming repo root)
         repo_root: Root of consuming repository
-
-    Returns:
-        Tuple of (are_equal, diff_message)
-        diff_message is None if files are equal, otherwise contains description
     """
     source_path = source_file
     dest_path = repo_root / dest_file
@@ -269,9 +210,6 @@ def sync_file(source_file: Path, dest_file: Path, repo_root: Path) -> None:
         source_file: Path to source file (absolute)
         dest_file: Path to destination file (relative to repo root)
         repo_root: Root of consuming repository
-
-    Raises:
-        FileComparisonError: If copy operation fails
     """
     dest_path = repo_root / dest_file
 
@@ -294,12 +232,6 @@ def sync_files(
         config: Configuration dictionary
         repo_root: Root of consuming repository (defaults to current directory)
         write_mode: If True, overwrite files instead of failing
-
-    Returns:
-        Tuple of (errors, warnings)
-
-    Raises:
-        SyncError: For fatal errors
     """
     if repo_root is None:
         repo_root = Path.cwd()

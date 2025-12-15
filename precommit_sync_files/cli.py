@@ -1,5 +1,3 @@
-"""CLI entrypoint for sync-common-files."""
-
 import sys
 
 from precommit_sync_files.sync import (
@@ -12,12 +10,6 @@ from precommit_sync_files.sync import (
 
 
 def main() -> int:
-    """
-    Main CLI entrypoint.
-
-    Returns:
-        Exit code (0 for success, non-zero for failure)
-    """
     # Parse arguments
     write_mode = "--write" in sys.argv[1:]
 

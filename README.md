@@ -23,7 +23,14 @@ repos:
     rev: v0.1.0  # Use the tag you want
     hooks:
       - id: sync-common-files
+        # Optional: add --write to automatically sync files
+        # args: [--write]
 ```
+
+**Hook Arguments:**
+
+- No arguments (default): Check mode - detects drift without modifying files
+- `args: [--write]`: Write mode - automatically syncs files that differ
 
 Then run:
 
@@ -83,17 +90,77 @@ The hook runs automatically on `git commit` when configured. It will:
 1. Check if `.sync-files.toml` exists (no-op if missing)
 2. Fetch the source repository at the specified ref
 3. Compare files using SHA-256 hashes
-4. Fail if drift is detected (in `check` mode)
-5. Auto-sync files if `--write` flag is used
+4. Fail if drift is detected (default check mode)
+5. Auto-sync files if `args: [--write]` is configured
 
-### Manual execution
+**Example configurations:**
+
+```yaml
+# Check mode (default) - fails commit if drift detected
+- id: sync-common-files
+
+# Write mode - automatically syncs files before commit
+- id: sync-common-files
+  args: [--write]
+```
+
+### CLI Command
+
+The `sync-common-files` command can be run manually or integrated into CI/CD pipelines.
+
+#### Command Syntax
 
 ```bash
-# Check mode (default)
+sync-common-files [--write]
+```
+
+#### Options
+
+| Option     | Description                                                                                |
+| ---------- | ------------------------------------------------------------------------------------------ |
+| `--write`  | Automatically overwrite local files that differ from the canonical source. Default: check mode (read-only) |
+
+#### Exit Codes
+
+| Code | Meaning                                    |
+| ---- | ------------------------------------------ |
+| `0`  | Success - All files are synchronized      |
+| `1`  | Failure - Drift detected or error occurred |
+
+#### Behavior
+
+**Check Mode (default):**
+
+- Compares files without modifying them
+- Reports mismatches to `stderr`
+- Suggests using `--write` if drift is detected
+- Returns exit code `1` if any files differ
+
+**Write Mode (`--write`):**
+
+- Automatically overwrites local files that differ
+- Prints successfully synchronized files to `stderr`
+- Returns exit code `0` on successful sync
+
+**No-op Mode:**
+
+- If `.sync-files.toml` is not found, the command exits silently with code `0`
+- This allows the hook to be installed globally without requiring configuration in every repository
+
+#### Examples
+
+```bash
+# Check mode (default) - detect drift without modifying files
 sync-common-files
 
-# Write mode (auto-sync files)
+# Write mode - automatically sync files
 sync-common-files --write
+
+# With uv (if not globally installed)
+uv run sync-common-files
+
+# In CI/CD pipeline (check mode recommended)
+sync-common-files || exit 1
 ```
 
 ### CI Integration
@@ -104,7 +171,13 @@ Recommended usage in CI:
 pre-commit run sync-common-files --all-files
 ```
 
-This enforces drift detection without mutating files.
+Or run the CLI directly:
+
+```bash
+sync-common-files
+```
+
+This enforces drift detection without mutating files. If drift is detected, the CI job will fail.
 
 ## How It Works
 
