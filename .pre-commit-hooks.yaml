@@ -4,3 +4,4 @@
   language: python
   pass_filenames: false
   description: Ensures synced files match canonical source repository
+  verbose: true
