@@ -1,5 +1,5 @@
 # Extract version from __init__.py
-VERSION := $(shell grep -E "^__version__ = " precommit_sync_files/__init__.py | cut -d'"' -f2)
+VERSION := $(shell grep -E "^__version__ = " precommit_sync_files/__init__.py | sed -E "s/^__version__ = ['\"](.*)['\"].*/\1/")
 TAG := v$(VERSION)
 
 #* Setup
