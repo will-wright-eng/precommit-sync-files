@@ -20,7 +20,7 @@ Add this to your `.pre-commit-config.yaml`:
 ```yaml
 repos:
   - repo: https://github.com/will-wright-eng/precommit-sync-files
-    rev: v0.1.0  # Use the tag you want
+    rev: v0.3.1  # Use the tag you want
     hooks:
       - id: sync-common-files
         # Optional: add --write to automatically sync files
